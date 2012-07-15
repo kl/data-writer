@@ -3,7 +3,7 @@ data-writer
 
 Normally you can only read from DATA but with data-writer you can also write to it. This allows you to easily persist data in a source file.
 
-__Installation__
+###Installation
 
 gem install data-writer
 
@@ -31,3 +31,17 @@ run: 1
 Each time this program is run it will increment run by 1 and persist the result in the YAML hash.
 
 __API__
+
+DATAWriter.file
+
+
+
+
+
+
+
+
+
+
+
+
