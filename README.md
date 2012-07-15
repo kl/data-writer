@@ -7,7 +7,7 @@ Normally you can only read from DATA but with data-writer you can also write to 
 
 gem install data-writer
 
-__Usage__
+###Usage
 
 Here is a simple example program that keeps track of how many times it has been executed and stores this as a YAML file in DATA.
 
@@ -30,9 +30,35 @@ run: 1
 
 Each time this program is run it will increment run by 1 and persist the result in the YAML hash.
 
-__API__
+###API
 
-DATAWriter.file
+__DATAWriter.file(mode_string, opt = {})__
+
+A factory method that makes file object which can write to data.
+mode_string and opt are the same as for File.new.
+If this method is called with a block it behaves as File.open and if it is called without
+a block it returns a File object as in File.new.
+
+Example:
+
+```ruby
+# append to DATA
+require 'data-writer'
+
+appender = DATAWriter.file("a")
+appender.write " my dear Watson"
+appender.close  # DATA.read => "Elementary my dear Watson"
+
+__END__
+Elementary
+```
+
+If this method is called and DATA is not defined then it will raise a DATANotFoundError exception.
+The file objects returned by this method have their #rewind method changed so that it seeks back to
+the start of DATA, and not back to the start of the file.
+
+
+
 
 
 
