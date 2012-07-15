@@ -20,9 +20,9 @@ class DATAWriter
     if mode =~ /w/      # if we have a "w" we first need to delete everything after __END__.
       clear_end
       mode.include?("b") ? m = "rb+" : m = "r+"   # the actual mode will be rb+ or r+.
-      file = File.new(data_path, m, opt)
+      file = create_file(data_path, m, opt)
     else
-      file = File.new(data_path, mode, opt)
+      file = create_file(data_path, mode, opt)
     end
 
     @data_start_pos = scan_data_pos   # remeber the current position of __END__.
@@ -36,6 +36,18 @@ class DATAWriter
       enhanced
     end
   end
+
+  #
+  # Helper method to create a file that works in both 1.8 and 1.9.
+  #
+  def self.create_file(path, mode_string, opt = {})
+    if RUBY_VERSION =~ /(1\.9)|(19)/
+      File.new(path, mode_string, opt)
+    else
+      File.new(path, mode_string)
+    end
+  end
+  private_class_method :create_file
 
   #
   # Deletes everything after __END__. This is used to simulate the "w" permission mode.
