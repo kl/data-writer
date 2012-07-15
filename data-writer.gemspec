@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors     	= ["Kalle Lindström"]
   s.email       	= ["lindstrom.kalle@gmail.com"]
   s.homepage    	= "https://github.com/kl/data-writer"
-  s.files       	= %w[lib/data-writer.rb README.md data-writer.gemspec]
+  s.files       	= %w[lib/data-writer.rb README.md data-writer.gemspec Gemfile]
   s.require_paths = ['lib']
   s.has_rdoc 		  = false
 
