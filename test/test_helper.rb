@@ -3,7 +3,7 @@
 # Is called by datawriter_test in a subshell that returns the output of the specifed method.
 #
 
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)) + "../lib")
+$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)) + "/../lib")
 require 'data-writer.rb'
 
 module TestHelper
