@@ -34,7 +34,7 @@ Each time this program is run it will increment run by 1 and persist the result 
 
 __DATAWriter.file(mode_string, opt = {})__
 
-A factory method that makes file object which can write to data.
+A factory method that makes file objects which can write to data.
 mode_string and opt are the same as for File.new.
 If this method is called with a block it behaves as File.open and if it is called without
 a block it returns a File object as in File.new.
