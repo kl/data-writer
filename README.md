@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/kl/data-writer.png)](http://travis-ci.org/kl/data-writer)
+
 data-writer
 ===========
 
