@@ -15,13 +15,14 @@ class DATAWriter
   #
   def self.file(mode, opt={})
     check_DATA_defined  # raises an exception if DATA is not defined.
+    data_path = File.expand_path(Data.path)
 
     if mode =~ /w/      # if we have a "w" we first need to delete everything after __END__.
       clear_end
       mode.include?("b") ? m = "rb+" : m = "r+"   # the actual mode will be rb+ or r+.
-      file = File.new(DATA, m, opt)
+      file = File.new(data_path, m, opt)
     else
-      file = File.new(DATA, mode, opt)
+      file = File.new(data_path, mode, opt)
     end
 
     @data_start_pos = scan_data_pos   # remeber the current position of __END__.
@@ -40,7 +41,7 @@ class DATAWriter
   # Deletes everything after __END__. This is used to simulate the "w" permission mode.
   #
   def self.clear_end
-    file_path = File.expand_path($0)
+    file_path = File.expand_path(Data.path)
     file_content = File.read(file_path)
     new_content = file_content[/.+?^__END__$/m] + "\n"    # everything up to an including __END__.
 
