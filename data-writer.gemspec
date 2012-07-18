@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        	= 'data-writer'
-  s.version     	= '0.9.0'
-  s.date        	= '2012-07-15'
+  s.version     	= '0.9.1'
+  s.date        	= '2012-07-18'
   s.summary     	= "Allows you to write to DATA"
   s.description 	= "Normally you can only read from DATA but with data-writer you can also write to it. This allows you to easily persist data in a source file."
   s.authors     	= ["Kalle Lindstrom"]
