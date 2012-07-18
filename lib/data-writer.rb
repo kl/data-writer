@@ -79,7 +79,7 @@ class DATAWriter
   # Helper method to create a file that works in both 1.8 and 1.9.
   #
   def self.create_file(path, mode_string, opt = {})
-    if RUBY_VERSION =~ /(1\.9)|(19)/
+    if RUBY_VERSION =~ /(1\.9)|(19)/ && !(RUBY_VERSION =~ /jruby/)  # JRuby does not seem to like int modes along with opt
       File.new(path, mode_string, opt)
     else
       File.new(path, mode_string)
