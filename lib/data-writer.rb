@@ -76,13 +76,22 @@ class DATAWriter
   private_class_method :get_valid_int_mode
 
   #
-  # Helper method to create a file that works in both 1.8 and 1.9.
+  # Helper method to create a file that works in both 1.8 and 1.9 and different implementations.
   #
   def self.create_file(path, mode_string, opt = {})
-    if RUBY_VERSION =~ /(1\.9)|(19)/ && !(RUBY_PLATFORM =~ /java/i)  # JRuby does not seem to like int modes along with opt
-      File.new(path, mode_string, opt)
+    if RUBY_PLATFORM =~ /java/i
+      if RUBY_VERSION =~ /1\.9\.3/
+        File.new(path, mode_string, opt)    # Only JRuby 1.7 seem to implement this method the 1.9 way.
+      else
+        File.new(path, mode_string)
+      end
+
     else
-      File.new(path, mode_string)
+      if RUBY_VERSION =~ /1\.9/
+        File.new(path, mode_string, opt)
+      else
+        File.new(path, mode_string)
+      end
     end
   end
   private_class_method :create_file
