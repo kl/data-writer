@@ -12,20 +12,21 @@ class DATAWriter
   
   #
   # Factory method for DATA writers. Works simliar to File.new.
+  # mode can be both a string like "w" or a number like File::WRONLY
   #
   def self.file(mode, opt={})
     check_DATA_defined  # raises an exception if DATA is not defined.
     data_path = File.expand_path(DATA.path)
 
-    if mode =~ /w/      # if we have a "w" we first need to delete everything after __END__.
-      clear_end
-      mode.include?("b") ? m = "rb+" : m = "r+"   # the actual mode will be rb+ or r+.
-      file = create_file(data_path, m, opt)
+    if mode.is_a?(String)
+      valid_mode = get_valid_string_mode(mode)
     else
-      file = create_file(data_path, mode, opt)
+      valid_mode = get_valid_int_mode(mode)
     end
 
-    @data_start_pos = scan_data_pos   # remeber the current position of __END__.
+    file = create_file(data_path, valid_mode, opt)
+
+    @data_start_pos = scan_data_pos
     file.pos = @data_start_pos        # sets the file pos to the line after __END__.
     enhanced = enhance_file(file)     # adds specialized methods for this object.
 
@@ -36,6 +37,43 @@ class DATAWriter
       enhanced
     end
   end
+
+  #
+  # If "w" was specifed as a mode we need to remove that (because it will truncate the whole file)
+  # 
+  def self.get_valid_string_mode(mode)
+    if mode =~ /w/
+      clear_end       # truncate after __END__ only.
+      valid_mode = 0
+      valid_mode |= mode.include?("+") ? File::RDWR : File::RDONLY
+      valid_mode |= File::BINARY if mode.include?("b")
+      valid_mode
+    else
+      mode
+    end
+  end
+  private_class_method :get_valid_string_mode
+
+  #
+  # Same as get_valid_string_mode but for the integer modes specifed in File::Constants.
+  #
+  def self.get_valid_int_mode(mode)
+    if (mode & File::TRUNC) == File::TRUNC        # mode includes TRUNC
+      clear_end                                   # truncate after __END__ only.
+      valid_mode = 0
+      File::Constants.constants.each do |const|   # build new mode excluding TRUNC
+        value = File::const_get(const)
+        next if value.is_a?(String)               # for example File::NULL
+        if (mode & value) == value && value != File::TRUNC
+          valid_mode |= value
+        end
+      end
+      valid_mode
+    else
+      mode
+    end
+  end
+  private_class_method :get_valid_int_mode
 
   #
   # Helper method to create a file that works in both 1.8 and 1.9.
