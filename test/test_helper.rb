@@ -15,6 +15,12 @@ module TestHelper
       end 
     end
 
+    def int_mode_write(string)
+      DATAWriter.file(File::TRUNC|File::WRONLY) do |w|
+        w.write(string)
+      end
+    end
+
     def read
       DATAWriter.file("r+") do |r|
         print r.read
