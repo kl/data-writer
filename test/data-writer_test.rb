@@ -25,6 +25,13 @@ describe "DATAWriter" do
     result.must_equal "The brown fox jumps over the yellow snail."
   end
 
+  it "can open a file using File::Constants" do
+    `#{h} int_mode_write "1337"`
+    result = `#{h} read`
+    `#{h} reset_data`
+    result.must_equal "1337"
+  end
+
   it "can rewind back to __END__" do
     result = `#{h} read_rewind_read`
     result.must_equal "epic data\n\nA horse walks in to a bar. The bartender asks, 'why the long face'?\n"
