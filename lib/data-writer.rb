@@ -1,3 +1,4 @@
+#encoding: utf-8
 
 class DATAWriter
 
@@ -43,11 +44,13 @@ class DATAWriter
   # 
   def self.get_valid_string_mode(mode)
     if mode =~ /w/
-      clear_end       # truncate after __END__ only.
-      valid_mode = 0
-      valid_mode |= mode.include?("+") ? File::RDWR : File::RDONLY
-      valid_mode |= File::BINARY if mode.include?("b")
-      valid_mode
+      clear_end               # truncate after __END__ only.
+      if mode.include?("+")
+        mode.sub!("w", "r")
+      else
+        mode.sub!("w", "r+")
+      end
+      mode
     else
       mode
     end
@@ -79,15 +82,19 @@ class DATAWriter
   # Helper method to create a file that works in both 1.8 and 1.9 and different implementations.
   #
   def self.create_file(path, mode_string, opt = {})
+    opt = {:encoding => __ENCODING__}.merge(opt)   # Make sure the IO encoding is the same as the source encoding.
+
+    ruby = RUBY_VERSION[/\d\.\d\.\d/]
+
     if RUBY_PLATFORM =~ /java/i
-      if RUBY_VERSION =~ /1\.9\.3/
-        File.new(path, mode_string, opt)    # Only JRuby 1.7 seem to implement this method the 1.9 way.
+      if ruby >= "1.9.3"
+        File.new(path, mode_string, opt)           # Only JRuby 1.7 seem to implement this method the 1.9 way.
       else
         File.new(path, mode_string)
       end
 
     else
-      if RUBY_VERSION =~ /1\.9/
+      if ruby >= "1.9.0"
         File.new(path, mode_string, opt)
       else
         File.new(path, mode_string)
