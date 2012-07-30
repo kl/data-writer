@@ -59,3 +59,4 @@ If this method is called and DATA is not defined then it will raise a DATANotFou
 The file objects returned by this method have their #rewind method changed so that it seeks back to
 the start of DATA, and not back to the start of the file.
 
+
