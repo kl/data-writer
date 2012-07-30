@@ -82,19 +82,19 @@ class DATAWriter
   # Helper method to create a file that works in both 1.8 and 1.9 and different implementations.
   #
   def self.create_file(path, mode_string, opt = {})
-    opt = {:encoding => __ENCODING__}.merge(opt)   # Make sure the IO encoding is the same as the source encoding.
-
     ruby = RUBY_VERSION[/\d\.\d\.\d/]
 
     if RUBY_PLATFORM =~ /java/i
       if ruby >= "1.9.3"
-        File.new(path, mode_string, opt)           # Only JRuby 1.7 seem to implement this method the 1.9 way.
+        opt = {:encoding => __ENCODING__}.merge(opt)   # Make sure the IO encoding is the same as the source encoding.
+        File.new(path, mode_string, opt)               # Only JRuby 1.7 seem to implement this method the 1.9 way.
       else
         File.new(path, mode_string)
       end
 
     else
       if ruby >= "1.9.0"
+        opt = {:encoding => __ENCODING__}.merge(opt)
         File.new(path, mode_string, opt)
       else
         File.new(path, mode_string)
