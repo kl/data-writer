@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 #
 # A file used to test DATAWriter
 # Is called by datawriter_test in a subshell that returns the output of the specifed method.
@@ -57,6 +59,12 @@ module TestHelper
       DATAWriter.file("r+") do |f|
         f.write(string)
       end
+    end
+
+    # Sending in a string through the shell will change it's encoding to the shell's encoding.
+    # Therefore this method writes a hardcoded UTF-8 string.
+    def write_utf8_test
+      write("ちょうどいい")
     end
   end
 end
