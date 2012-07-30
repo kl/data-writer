@@ -1,7 +1,0 @@
-___0.9.1 - 2012/07/18___
-
-  * Added full support for numerical file options (File::Constants)
-
-___0.9 - 2012/07/15___
-
-  * Initial release version.
