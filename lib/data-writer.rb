@@ -9,8 +9,7 @@ class DATAWriter
   # mode can be both a string like "w" or a number like File::WRONLY
   #
   def self.file(mode, opt={})
-    raise_data_not_found unless Module.const_defined?(:DATA)  # raises an exception if DATA is not defined.
-    data_path = File.expand_path(DATA.path)
+    raise_data_not_found unless data_defined?  # raises an exception if DATA is not defined.
 
     if mode.is_a?(String)
       valid_mode = get_valid_string_mode(mode)
@@ -31,6 +30,9 @@ class DATAWriter
     end
   end
 
+  #
+  # Get the path of the source file.
+  #
   def self.get_source_path
     File.expand_path($0)
   end
@@ -146,6 +148,18 @@ class DATAWriter
     file
   end
   private_class_method :enhance_file
+
+  #
+  # Because Module.const_defined?(:DATA) does not work in 1.8 for some reason...
+  #
+  def self.data_defined?
+    begin
+      DATA
+    rescue NameError
+      false
+    end
+  end
+  private_class_method :data_defined?
 
   #
   # Raises a DATANotFoundError exception.
