@@ -5,18 +5,11 @@ class DATAWriter
   class DATANotFoundError < StandardError; end
 
   #
-  # The position in the file where DATA starts (line after __END__)
-  #
-  def self.data_start_pos
-    @data_start_pos
-  end
-  
-  #
   # Factory method for DATA writers. Works simliar to File.new.
   # mode can be both a string like "w" or a number like File::WRONLY
   #
   def self.file(mode, opt={})
-    check_DATA_defined  # raises an exception if DATA is not defined.
+    raise_data_not_found unless Module.const_defined?(:DATA)  # raises an exception if DATA is not defined.
     data_path = File.expand_path(DATA.path)
 
     if mode.is_a?(String)
@@ -25,11 +18,10 @@ class DATAWriter
       valid_mode = get_valid_int_mode(mode)
     end
 
-    file = create_file(data_path, valid_mode, opt)
+    file = create_file(get_source_path, valid_mode, opt)
 
-    @data_start_pos = scan_data_pos
-    file.pos = @data_start_pos        # sets the file pos to the line after __END__.
-    enhanced = enhance_file(file)     # adds specialized methods for this object.
+    file.pos = scan_data_pos        # sets the file pos to the line after __END__.
+    enhanced = enhance_file(file)   # adds specialized methods for this object.
 
     if block_given?
       yield(enhanced)
@@ -38,6 +30,11 @@ class DATAWriter
       enhanced
     end
   end
+
+  def self.get_source_path
+    File.expand_path($0)
+  end
+  private_class_method :get_source_path
 
   #
   # If "w" was specifed as a mode we need to remove that (because it will truncate the whole file)
@@ -120,7 +117,7 @@ class DATAWriter
   # problems when opening the file in "w" mode.
   #
   def self.scan_data_pos
-    source_file = File.new(File.expand_path($0))
+    source_file = File.new(get_source_path)
 
     until source_file.eof?
       line = source_file.gets
@@ -131,32 +128,30 @@ class DATAWriter
       end
     end
     source_file.close
-    raise DATANotFoundError, "DATA object does not exist. Ensure that the file has __END__"
+    raise_data_not_found
   end
   private_class_method :scan_data_pos
 
   #
   # Adds specialized methods to the DATA writer object.
   #
-  def self.enhance_file(object)
+  def self.enhance_file(file)
 
-    def object.rewind   # so that #rewind will go back to __END__ and not the beginning of the file.
-      self.pos = DATAWriter.data_start_pos
+    file.instance_variable_set(:@DATA_pos, file.pos)
+
+    def file.rewind   # so that #rewind will go back to __END__ and not the beginning of the file.
+      self.pos = @DATA_pos
     end
 
-    object
+    file
   end
   private_class_method :enhance_file
 
   #
-  # Raises a DATANotFoundError exception if DATA is not defined.
+  # Raises a DATANotFoundError exception.
   #
-  def self.check_DATA_defined
-    begin
-      DATA
-    rescue NameError
-      raise DATANotFoundError, "DATA object does not exist. Ensure that the file has __END__"
-    end
+  def self.raise_data_not_found
+    raise DATANotFoundError, "DATA object does not exist. Ensure that the file has __END__"
   end
-  private_class_method :check_DATA_defined
+  private_class_method :raise_data_not_found
 end
