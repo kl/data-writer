@@ -49,7 +49,9 @@ require 'data-writer'
 
 appender = DATAWriter.file("a")
 appender.write " my dear Watson"
-appender.close  # DATA.read => "Elementary my dear Watson"
+appender.close
+
+DATA.read # => "Elementary my dear Watson"
 
 __END__
 Elementary
