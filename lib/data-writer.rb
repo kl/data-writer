@@ -107,7 +107,6 @@ class DATAWriter
   private_class_method :create_file
 
   #
-<<<<<<< HEAD
   # Deletes everything after __END__. This is used to simulate the "w" permission mode.
   #
   def self.clear_end
@@ -118,9 +117,8 @@ class DATAWriter
   end
   private_class_method :clear_end
 
-=======
+  #
   # Returns a new options hash that has it's :encoding key set to the source file encoding.
->>>>>>> Refactoring
   #
   def self.opt_with_encoding(opt)
     {:encoding => __ENCODING__}.merge(opt)
