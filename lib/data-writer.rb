@@ -106,8 +106,7 @@ class DATAWriter
   # Deletes everything after __END__. This is used to simulate the "w" permission mode.
   #
   def self.clear_end
-    file_path = File.expand_path(DATA.path)
-    file_content = File.read(file_path)
+    file_content = File.read(get_source_path)
     new_content = file_content[/.+?^__END__$/m] + "\n"    # everything up to an including __END__.
 
     File.open(file_path, "w") { |f| f.write(new_content) }
