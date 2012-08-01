@@ -18,7 +18,7 @@ class DATAWriter
     end
 
     file = create_file(get_source_path, valid_mode, opt)
-    file.pos = DATA.pos                                     # sets the file pos to the line after __END__.
+    file.pos = get_data_pos                                 # sets the file pos to the line after __END__.
     enhanced = enhance_file(file)                           # adds specialized methods for this object.
 
     if block_given?
@@ -36,6 +36,18 @@ class DATAWriter
     File.expand_path($0)
   end
   private_class_method :get_source_path
+
+  #
+  # Returns the position of __END__ in the source file.
+  #
+  def self.get_data_pos
+    if RUBY_PLATFORM =~ /java/i
+      scan_data_pos
+    else
+      DATA.pos
+    end
+  end
+  private_class_method :get_data_pos
 
   #
   # If "w" was specifed as a mode we need to remove that (because it will truncate the whole file)
@@ -107,23 +119,32 @@ class DATAWriter
   private_class_method :create_file
 
   #
-  # Deletes everything after __END__. This is used to simulate the "w" permission mode.
-  #
-  def self.clear_end
-    file_content = File.read(get_source_path)
-    new_content = file_content[/.+?^__END__$/m] + "\n"    # everything up to an including __END__.
-
-    File.open(get_source_path, "w") { |f| f.write(new_content) }
-  end
-  private_class_method :clear_end
-
-  #
   # Returns a new options hash that has it's :encoding key set to the source file encoding.
   #
   def self.opt_with_encoding(opt)
     {:encoding => __ENCODING__}.merge(opt)
   end
   private_class_method :opt_with_encoding
+
+  #
+  # Finds the position in the file after __END__ (same as DATA.pos)
+  # This method is only used by JRuby since DATA.pos does not work in JRuby.
+  #
+  def self.scan_data_pos
+    source_file = File.new(get_source_path)
+
+    until source_file.eof?
+      line = source_file.gets
+      if line =~ /^__END__$/
+        pos = source_file.pos
+        source_file.close
+        return pos
+      end
+    end
+    source_file.close
+    raise_data_not_found
+  end
+  private_class_method :scan_data_pos
 
   #
   # Adds specialized methods to the DATA writer object.
