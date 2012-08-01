@@ -18,9 +18,8 @@ class DATAWriter
     end
 
     file = create_file(get_source_path, valid_mode, opt)
-
-    file.pos = scan_data_pos        # sets the file pos to the line after __END__.
-    enhanced = enhance_file(file)   # adds specialized methods for this object.
+    file.pos = DATA.pos                                     # sets the file pos to the line after __END__.
+    enhanced = enhance_file(file)                           # adds specialized methods for this object.
 
     if block_given?
       yield(enhanced)
@@ -43,13 +42,9 @@ class DATAWriter
   # 
   def self.get_valid_string_mode(mode)
     if mode =~ /w/
-      clear_end               # truncate after __END__ only.
-      if mode.include?("+")
-        mode.sub!("w", "r")
-      else
-        mode.sub!("w", "r+")
-      end
-      mode
+      trunc_end                                       # truncate after __END__.
+      sub_with = mode.include?("+") ? "r" : "r+"      # the actual mode will be "r+"
+      mode.sub("w", sub_with)
     else
       mode
     end
@@ -61,7 +56,7 @@ class DATAWriter
   #
   def self.get_valid_int_mode(mode)
     if (mode & File::TRUNC) == File::TRUNC        # mode includes TRUNC
-      clear_end                                   # truncate after __END__ only.
+      trunc_end                                   # truncate after __END__.
       valid_mode = 0
       File::Constants.constants.each do |const|   # build new mode excluding TRUNC
         value = File::const_get(const)
@@ -78,6 +73,17 @@ class DATAWriter
   private_class_method :get_valid_int_mode
 
   #
+  # Deletes everything after __END__. This is used to simulate the "w" permission mode.
+  #
+  def self.trunc_end
+    file_content = File.read(get_source_path)
+    new_content = file_content[/.+?^__END__$/m] + "\n"    # everything up to and including __END__.
+
+    File.open(get_source_path, "w") { |f| f.write(new_content) }
+  end
+  private_class_method :trunc_end
+
+  #
   # Helper method to create a file that works in both 1.8 and 1.9 and different implementations.
   #
   def self.create_file(path, mode_string, opt = {})
@@ -85,16 +91,14 @@ class DATAWriter
 
     if RUBY_PLATFORM =~ /java/i
       if ruby >= "1.9.3"
-        opt = {:encoding => __ENCODING__}.merge(opt)   # Make sure the IO encoding is the same as the source encoding.
-        File.new(path, mode_string, opt)               # Only JRuby 1.7 seem to implement this method the 1.9 way.
+        File.new(path, mode_string, opt_with_encoding(opt))   # Only JRuby 1.7 seem to implement this method the 1.9 way.
       else
         File.new(path, mode_string)
       end
 
     else
       if ruby >= "1.9.0"
-        opt = {:encoding => __ENCODING__}.merge(opt)
-        File.new(path, mode_string, opt)
+        File.new(path, mode_string, opt_with_encoding(opt))
       else
         File.new(path, mode_string)
       end
@@ -103,6 +107,7 @@ class DATAWriter
   private_class_method :create_file
 
   #
+<<<<<<< HEAD
   # Deletes everything after __END__. This is used to simulate the "w" permission mode.
   #
   def self.clear_end
@@ -113,25 +118,14 @@ class DATAWriter
   end
   private_class_method :clear_end
 
+=======
+  # Returns a new options hash that has it's :encoding key set to the source file encoding.
+>>>>>>> Refactoring
   #
-  # Finds the position in the file after __END__. DATA.pos isn't used because of
-  # problems when opening the file in "w" mode.
-  #
-  def self.scan_data_pos
-    source_file = File.new(get_source_path)
-
-    until source_file.eof?
-      line = source_file.gets
-      if line =~ /^^__END__$/
-        pos = source_file.pos
-        source_file.close
-        return pos
-      end
-    end
-    source_file.close
-    raise_data_not_found
+  def self.opt_with_encoding(opt)
+    {:encoding => __ENCODING__}.merge(opt)
   end
-  private_class_method :scan_data_pos
+  private_class_method :opt_with_encoding
 
   #
   # Adds specialized methods to the DATA writer object.
