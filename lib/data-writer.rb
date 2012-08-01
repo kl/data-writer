@@ -109,7 +109,7 @@ class DATAWriter
     file_content = File.read(get_source_path)
     new_content = file_content[/.+?^__END__$/m] + "\n"    # everything up to an including __END__.
 
-    File.open(file_path, "w") { |f| f.write(new_content) }
+    File.open(get_source_path, "w") { |f| f.write(new_content) }
   end
   private_class_method :clear_end
 
